@@ -1,0 +1,5 @@
+Flask
+SQLAlchemy
+weasyprint
+pywin32
+psycopg2-binary

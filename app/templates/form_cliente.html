@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}Nuevo cliente{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="fw-bold mb-3">Nuevo cliente</h1>
+
+    <a href="{{ url_for('clientes_bp.inicio') }}" class="btn btn-link mb-3">&larr; Volver al inicio</a>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre del cliente *</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre"
+                           required placeholder="Ej: Nueva Atacama, MultiX">
+                </div>
+
+                <div class="mb-3">
+                    <label for="modo_envio" class="form-label">Modo de envío de bitácoras</label>
+                    <select class="form-select" id="modo_envio" name="modo_envio">
+                        <option value="consolidado" selected>Consolidado (una bitácora por jornada)</option>
+                        <option value="por_lugar">Por lugar (una bitácora por cada lugar)</option>
+                    </select>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="1"
+                           id="activo" name="activo" checked>
+                    <label class="form-check-label" for="activo">
+                        Cliente activo
+                    </label>
+
+                </div>
+                    <label for="logo">Logo del cliente</label>
+                    <input type="file" name="logo" accept=".png,.jpg,.jpeg,.webp">
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Guardar cliente</button>
+                    <a href="{{ url_for('clientes_bp.inicio') }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

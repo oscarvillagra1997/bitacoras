@@ -1,0 +1,215 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Crear Bitácora
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <input type="hidden" id="cliente-id-hidden" value="{{ cliente_actual.id if cliente_actual else '' }}">
+    <h1 class="mb-4 fw-bold">
+        Crear Nueva Bitácora
+        {% if cliente_actual %}
+            - {{ cliente_actual.nombre }}
+        {% endif %}
+    </h1>
+    <form method="post" action="{{ url_for('bitacoras_bp.crear_bitacora') }}">
+        <!-- BLOQUE: INFO GENERAL -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white fw-semibold">
+                Información general
+            </div>
+            <div class="alert alert-info py-2 d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Modo colaborativo (demo):</strong>
+                    <span id="estado-socket">Conectando...</span>
+                </div>
+                <div>
+                    Operadores conectados en esta pantalla:
+                    <span id="usuarios-conectados" class="badge bg-secondary">0</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+
+                    <!-- Cliente -->
+                    <div class="col-lg-3">
+                        <label for="cliente" class="form-label fw-semibold">Cliente</label>
+
+                        {% if cliente_actual %}
+                            <!-- Select oculto para POST y JS -->
+                            <select id="cliente" name="cliente_id" class="form-select d-none" required>
+                                {% for cliente in clientes %}
+                                    <option value="{{ cliente.id }}"
+                                        {% if cliente.id == cliente_actual.id %}selected{% endif %}>
+                                        {{ cliente.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- Campo solo lectura -->
+                            <input type="text" class="form-control" value="{{ cliente_actual.nombre }}" readonly>
+                        {% else %}
+                            <!-- Select normal -->
+                            <select id="cliente" name="cliente_id" class="form-select" required>
+                                <option value="">Seleccionar Cliente</option>
+                                {% for cliente in clientes %}
+                                    <option value="{{ cliente.id }}"
+                                        {% if cliente_id_preseleccionado == cliente.id %}selected{% endif %}>
+                                        {{ cliente.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                    </div>
+
+                    <!-- Operadores -->
+                    <div class="col-lg-3">
+                        <label for="operadores" class="form-label fw-semibold">Operadores</label>
+
+                        <div id="operadores-container">
+                            <div class="input-group mb-2">
+                                <select id="operadores" name="operadores[]" class="form-select" required>
+                                    <option value="">Seleccionar Operador</option>
+                                    {% for operador in operadores %}
+                                        <option value="{{ operador.id }}">{{ operador.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-danger btn-sm remove-operador">
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" id="agregar-operador" class="btn btn-primary btn-sm mt-2">
+                            Agregar operador
+                        </button>
+                    </div>
+
+                    <!-- Horario y fechas -->
+                    <div class="col-lg-3">
+                        <div class="mb-3">
+                            <label for="horario" class="form-label fw-semibold">Horario</label>
+                            <select id="horario" name="horario" class="form-select" required>
+                                <option value="20:00 hrs - 08:00 hrs">20:00 hrs - 08:00 hrs</option>
+                                <option value="24 hrs">24 hrs</option>
+                            </select>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="fecha_inicio" class="form-label">Inicio</label>
+                                <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fecha_fin" class="form-label">Finalización</label>
+                                <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Importar Excel -->
+                    <div class="col-lg-3">
+                        <label class="form-label fw-semibold d-block">
+                            <img src="{{ url_for('static', filename='icons/filetype-xlsx.svg') }}"
+                                 alt="Logo" width="32" height="32" class="me-1">
+                            Importar respaldo desde Excel
+                        </label>
+                        <input type="file" id="excel-input" accept=".xlsx,.xls" class="form-control mb-2">
+                        <small class="text-muted d-block">
+                            Debe contener columnas: Lugar, Cámara, Hora Evento, Tipo de Evento, Observaciones.
+                        </small>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOQUE: EVENTOS -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white fw-semibold">
+                Eventos de la jornada
+            </div>
+            <div class="card-body">
+                <div id="eventos-container">
+                    <div class="input-group mb-3">
+                        <select class="form-select" name="lugares[]" required>
+                            <option value="">Seleccione un cliente...</option>
+                        </select>
+
+                        <input type="text" class="form-control" name="camaras[]" placeholder="Cámara" required>
+                        <input type="time" class="form-control" name="horas_evento[]" required>
+
+                        <select class="form-select" name="tipos_evento[]" required>
+                            <option value="">Seleccionar Tipo de Evento</option>
+                            {% for evento in eventos %}
+                                <option value="{{ evento.id }}">{{ evento.nombre }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <input type="text" class="form-control" name="observaciones[]" placeholder="Observaciones" required>
+
+                        <button type="button" class="btn btn-danger btn-sm remove-evento">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" id="agregar-evento" class="btn btn-primary btn-sm">
+                    Agregar evento
+                </button>
+            </div>
+        </div>
+
+        <!-- BOTÓN FINAL -->
+        <div class="text-end mb-5">
+            <button type="submit" class="btn btn-danger btn-lg px-4" onclick="confirmarEnvio(event)">
+                Crear Bitácora
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Templates para filas dinámicas -->
+<template id="operador-row-template">
+    <div class="input-group mb-2">
+        <select class="form-select" name="operadores[]" required>
+            <option value="">Seleccionar Operador</option>
+            {% for operador in operadores %}
+                <option value="{{ operador.id }}">{{ operador.nombre }}</option>
+            {% endfor %}
+        </select>
+        <button type="button" class="btn btn-danger btn-sm remove-operador">Eliminar</button>
+    </div>
+</template>
+
+<template id="evento-row-template">
+    <div class="input-group mb-3">
+        <select class="form-select" name="lugares[]" required>
+            <option value="">Seleccione un cliente...</option>
+        </select>
+
+        <input type="text" class="form-control" name="camaras[]" placeholder="Cámara" required>
+        <input type="time" class="form-control" name="horas_evento[]" required>
+
+        <select class="form-select" name="tipos_evento[]" required>
+            <option value="">Seleccionar Tipo de Evento</option>
+            {% for evento in eventos %}
+                <option value="{{ evento.id }}">{{ evento.nombre }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="text" class="form-control" name="observaciones[]" placeholder="Observaciones" required>
+
+        <button type="button" class="btn btn-danger btn-sm remove-evento">Eliminar</button>
+    </div>
+</template>
+
+<!-- Librerías externas -->
+<script src="{{ url_for('static', filename='js/sweetalert2@11.js')}}"></script>
+<script src="{{ url_for('static', filename='js/xlsx.full.min.js')}}"></script>
+<script src="{{ url_for('static', filename='js/socket.io.min.js')}}"></script>
+<script src="{{ url_for('static', filename='js/bitacora_core.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bitacora_socket.js') }}"></script>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Detalles de la Bitácora</h1>
+<p><strong>Fecha de inicio:</strong> {{ bitacora.fecha_inicio }}</p>
+<p><strong>Fecha de fin:</strong> {{ bitacora.fecha_fin }}</p>
+<p><strong>Horario:</strong> {{ bitacora.horario }}</p>
+
+<h2>Eventos por lugar</h2>
+{% for lugar, eventos in eventos_por_lugar.items() %}
+    <h3>{{ lugar }}</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Hora</th>
+                <th>Cámara</th>
+                <th>Evento</th>
+                <th>Observaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for evento in eventos %}
+                <tr>
+                    <td>{{ evento.hora }}</td>
+                    <td>{{ evento.camara }}</td>
+                    <td>{{ evento.evento_id }}</td>
+                    <td>{{ evento.observaciones }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
+{% endblock %}

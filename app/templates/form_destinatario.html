@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ titulo_form }} – {{ cliente.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="fw-bold mb-3">
+        {{ titulo_form }} – {{ cliente.nombre }}
+    </h1>
+
+    <a href="{{ url_for('clientes_bp.ver_destinatarios_cliente', cliente_id=cliente.id) }}"
+       class="btn btn-link mb-3">&larr; Volver a destinatarios</a>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre / Cargo</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre"
+                           value="{{ destinatario.nombre if destinatario else '' }}"
+                           placeholder="Ej: Jefe de Operaciones, Coordinador CCTV">
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Correo electrónico *</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           required
+                           value="{{ destinatario.email if destinatario else '' }}"
+                           placeholder="correo@empresa.cl">
+                </div>
+
+                <div class="mb-3">
+                    <label for="tipo" class="form-label">Tipo de destinatario</label>
+                    <select class="form-select" id="tipo" name="tipo">
+                        {% set tipo_actual = destinatario.tipo if destinatario else 'to' %}
+                        <option value="to"  {% if tipo_actual == 'to' %}selected{% endif %}>TO (principal)</option>
+                        <option value="cc"  {% if tipo_actual == 'cc' %}selected{% endif %}>CC (con copia)</option>
+                        <option value="bcc" {% if tipo_actual == 'bcc' %}selected{% endif %}>BCC (copia oculta)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="lugar_id" class="form-label">Lugar asociado</label>
+                    <select class="form-select" id="lugar_id" name="lugar_id">
+                        <option value="">Consolidado / sin lugar específico</option>
+                        {% set lugar_actual = destinatario.lugar_id if destinatario else None %}
+                        {% for lugar in lugares %}
+                            <option value="{{ lugar.id }}"
+                                {% if lugar_actual == lugar.id %}selected{% endif %}>
+                                {{ lugar.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">
+                        Déjalo en blanco si este correo aplica a todo el cliente (consolidado).
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        Guardar
+                    </button>
+                    <a href="{{ url_for('clientes_bp.ver_destinatarios_cliente', cliente_id=cliente.id) }}"
+                       class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

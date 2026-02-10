@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestión de Bitácoras{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon_ctr.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modo_oscuro.css') }}">
+    <script src="{{ url_for('static', filename='js/sweetalert2@11.js')}}"></script>
+  
+</head>
+<body>
+    <!-- Navbar -->
+    <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <img src="{{ url_for('static', filename='img/logo_ctr.png') }}"
+                 alt="Logo"
+                 width="60"
+                 height="60"
+                 class="d-inline-block align-text-top">
+        </a>
+
+        <!-- Botón hamburguesa -->
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainNavbar"
+                aria-controls="mainNavbar"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Contenido colapsable -->
+        <div class="collapse navbar-collapse" id="mainNavbar">
+
+            <!-- IZQUIERDA: menú -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Inicio</a>
+                </li>
+
+                <!-- Crear Bitácora -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="#"
+                       id="dropdownBitacora"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        Crear Bitácora
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownBitacora">
+                        <li class="dropdown-header">Clientes consolidados</li>
+                        {% for c in clientes_consolidados %}
+                            <li>
+                                <a class="dropdown-item"
+                                   href="{{ url_for('bitacoras_bp.crear_bitacora', cliente_id=c.id) }}">
+                                    {{ c.nombre }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li><span class="dropdown-item text-muted">Sin clientes</span></li>
+                        {% endfor %}
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li class="dropdown-header">Clientes por lugar</li>
+                        {% for c in clientes_por_lugar %}
+                            <li>
+                                <a class="dropdown-item"
+                                   href="{{ url_for('bitacoras_bp.crear_bitacora', cliente_id=c.id) }}">
+                                    {{ c.nombre }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li><span class="dropdown-item text-muted">Sin clientes</span></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+
+                <!-- Destinatarios -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                       href="#"
+                       id="dropdownDestinatarios"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        Destinatarios
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownDestinatarios">
+
+                        <li class="dropdown-header">Clientes consolidados</li>
+                        {% for c in clientes_consolidados %}
+                            <li>
+                                <a class="dropdown-item"
+                                   href="{{ url_for('clientes_bp.ver_destinatarios_cliente', cliente_id=c.id) }}">
+                                    {{ c.nombre }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li><span class="dropdown-item text-muted">Sin clientes</span></li>
+                        {% endfor %}
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li class="dropdown-header">Clientes por lugar</li>
+                        {% for c in clientes_por_lugar %}
+                            <li>
+                                <a class="dropdown-item"
+                                   href="{{ url_for('clientes_bp.ver_destinatarios_cliente', cliente_id=c.id) }}">
+                                    {{ c.nombre }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li><span class="dropdown-item text-muted">Sin clientes</span></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- DERECHA: todo alineado en una sola fila -->
+            <div class="d-flex align-items-center gap-2">
+
+                <!-- + Nuevo cliente -->
+                <a class="btn btn-sm btn-outline-success"
+                   href="{{ url_for('clientes_bp.nuevo_cliente') }}">
+                    + Nuevo cliente
+                </a>
+
+                <!-- Botón Modo pruebas / Producción -->
+                <form method="post"
+                      action="{{ url_for('clientes_bp.toggle_modo_pruebas') }}"
+                      class="d-inline">
+                    <button type="submit"
+                            class="btn btn-sm {% if modo_pruebas %}btn-warning{% else %}btn-outline-success{% endif %}">
+                        {% if modo_pruebas %}
+                            🧪 Modo pruebas ON
+                        {% else %}
+                            ✅ Producción
+                        {% endif %}
+                    </button>
+                </form>
+
+                <!-- Switch de Modo Oscuro -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-warning dropdown-toggle d-flex align-items-center"
+                            id="themeMenuButton"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                        <!-- Aquí restauramos el contenedor que tu JS necesita -->
+                        <span id="current-theme-icon" class="me-2">
+                            <img src="{{ url_for('static', filename='icons/brightness-high.svg') }}"
+                                alt="Tema"
+                                width="20"
+                                height="20">
+                        </span>
+
+                        <span id="current-theme-label"></span>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeMenuButton">
+                        <li>
+                            <button class="dropdown-item d-flex align-items-center" data-theme-value="light">
+                                <img src="{{ url_for('static', filename='icons/brightness-high.svg') }}"
+                                    alt="Claro"
+                                    width="20"
+                                    height="20">
+                                <span class="ms-2">Claro</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item d-flex align-items-center" data-theme-value="dark">
+                                <img src="{{ url_for('static', filename='icons/moon-fill.svg') }}"
+                                    alt="Oscuro"
+                                    width="19"
+                                    height="19">
+                                <span class="ms-2">Oscuro</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-center text-white py-3 mt-5">
+        <p class="mb-0">© 2025 Gestión de Bitácoras CTR</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modo_oscuro.js') }}"></script>
+    <!-- Script para alternar modo oscuro -->
+</body>
+</html>

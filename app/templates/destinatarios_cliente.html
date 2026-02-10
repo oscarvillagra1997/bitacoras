@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+
+{% block title %}Destinatarios – {{ cliente.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="fw-bold mb-3">
+        Destinatarios de {{ cliente.nombre }}
+    </h1>
+
+    <p class="text-muted">
+        Modo de envío:
+        {% if es_consolidado %}
+            <span class="badge bg-info text-dark">Consolidado (una bitácora por jornada)</span>
+        {% else %}
+            <span class="badge bg-secondary">Por lugar (una bitácora por lugar)</span>
+        {% endif %}
+    </p>
+
+    <!-- ============================
+         TARJETA LUGARES DEL CLIENTE
+         ============================ -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Lugares del cliente</span>
+        </div>
+        <div class="card-body">
+            <!-- Formulario inline para crear nuevo lugar -->
+            <form class="row g-2 mb-3" method="post"
+                  action="{{ url_for('clientes_bp.nuevo_lugar', cliente_id=cliente.id) }}">
+                <div class="col-md-4">
+                    <input type="text" name="nombre" class="form-control"
+                           placeholder="Nombre del lugar" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="codigo_interno" class="form-control"
+                           placeholder="Código interno (opcional)">
+                </div>
+                <div class="col-md-3 form-check d-flex align-items-center">
+                    <input class="form-check-input me-2" type="checkbox" value="1"
+                           id="requiere_bitacora_individual" name="requiere_bitacora_individual">
+                    <label class="form-check-label" for="requiere_bitacora_individual">
+                        Requiere bitácora individual
+                    </label>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-success btn-sm">
+                        + Agregar lugar
+                    </button>
+                </div>
+            </form>
+
+            {% if lugares_cliente %}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Código interno</th>
+                                <th>Bitácora individual</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lugar in lugares_cliente %}
+                                <tr>
+                                    <td>{{ lugar.nombre }}</td>
+                                    <td>{{ lugar.codigo_interno or '-' }}</td>
+                                    <td>
+                                        {% if lugar.requiere_bitacora_individual %}
+                                            <span class="badge bg-info text-dark">Sí</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if lugar.activo %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <!-- Toggle activo -->
+                                        <form method="post"
+                                              action="{{ url_for('clientes_bp.toggle_lugar_activo', lugar_id=lugar.id) }}"
+                                              style="display:inline;">
+                                            <button type="submit"
+                                                    class="btn btn-outline-secondary btn-sm">
+                                                {% if lugar.activo %}Desactivar{% else %}Activar{% endif %}
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">No hay lugares configurados para este cliente.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ============================
+         TARJETA DESTINATARIOS
+         ============================ -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="h5 mb-0">Destinatarios configurados</h2>
+        <a href="{{ url_for('clientes_bp.nuevo_destinatario', cliente_id=cliente.id) }}"
+           class="btn btn-primary btn-sm">
+            + Agregar destinatario
+        </a>
+    </div>
+
+    {% if grupos_destinatarios %}
+        {% for nombre_lugar, dests in grupos_destinatarios|dictsort %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">
+                        {% if es_consolidado and nombre_lugar == "Consolidado / Sin lugar" %}
+                            Consolidado / sin lugar específico
+                        {% else %}
+                            Lugar: {{ nombre_lugar }}
+                        {% endif %}
+                    </span>
+                    <span class="badge bg-primary">{{ dests|length }} destinatario(s)</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0 table-sm align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th class="text-center">Tipo</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in dests %}
+                                    <tr>
+                                        <td>{{ d.nombre or '-' }}</td>
+                                        <td>{{ d.email }}</td>
+                                        <td class="text-center">
+                                            <span class="badge
+                                                {% if d.tipo == 'to' %}bg-success
+                                                {% elif d.tipo == 'cc' %}bg-warning text-dark
+                                                {% else %}bg-secondary{% endif %}">
+                                                {{ d.tipo|upper }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{{ url_for('clientes_bp.editar_destinatario', destinatario_id=d.id) }}"
+                                               class="btn btn-outline-primary btn-sm">
+                                                Editar
+                                            </a>
+                                            <form method="post"
+                                                  action="{{ url_for('clientes_bp.eliminar_destinatario', destinatario_id=d.id) }}"
+                                                  style="display:inline;"
+                                                  onsubmit="return confirm('¿Seguro que deseas eliminar este destinatario?');">
+                                                <button type="submit"
+                                                        class="btn btn-outline-danger btn-sm">
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            No hay destinatarios configurados para este cliente.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

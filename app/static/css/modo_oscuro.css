@@ -1,0 +1,76 @@
+
+/* ===========================================
+   MODO OSCURO GLOBAL (Bootstrap compatible)
+   =========================================== */
+body.dark-mode {
+    --bs-body-bg: #121212 !important;
+    --bs-body-color: #e5e5e5 !important;
+
+    --bs-card-bg: #1e1e1e !important;
+    --bs-card-border-color: #2c2c2c !important;
+
+    --bs-border-color: #2c2c2c !important;
+
+    --bs-input-bg: #1e1e1e !important;
+    --bs-input-color: #f0f0f0 !important;
+    --bs-input-border-color: #3a3a3a !important;
+
+    --bs-dropdown-bg: #1f1f1f !important;
+    --bs-dropdown-link-color: #e5e5e5 !important;
+    --bs-dropdown-link-hover-bg: #333333 !important;
+
+    --bs-btn-bg: #222 !important;
+    --bs-btn-border-color: #444 !important;
+
+    --bs-table-bg: #1d1d1d !important;
+    --bs-table-border-color: #2f2f2f !important;
+}
+
+/* Para inputs y selects que Bootstrap no cambia automáticamente */
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+    background-color: #1f1f1f !important;
+    color: #e5e5e5 !important;
+    border-color: #3a3a3a !important;
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #bfbfbf !important;
+}
+
+/* Cards personalizadas */
+body.dark-mode .card {
+    background: #1c1c1c !important;
+    border-color: #2d2d2d !important;
+    color: #eaeaea !important;
+}
+
+/* Bordes de input-group en modo oscuro */
+body.dark-mode .input-group-text {
+    background: #1e1e1e !important;
+    border-color: #3a3a3a !important;
+    color: #e5e5e5 !important;
+}
+
+/* Botón eliminar en modo oscuro */
+body.dark-mode .btn-danger {
+    background-color: #b13535 !important;
+    border-color: #992a2a !important;
+}
+
+/* Que el body use siempre las variables de Bootstrap */
+body {
+    background-color: var(--bs-body-bg, #ffffff);
+    color: var(--bs-body-color, #212529);
+}
+
+/* En modo oscuro asegúrate que el fondo sea oscuro */
+body.dark-mode {
+    background-color: #121212 !important;
+}
+
+/* Evitar que los contenedores pongan fondo blanco encima */
+body.dark-mode .container,
+body.dark-mode .container-fluid {
+    background-color: transparent !important;
+}
