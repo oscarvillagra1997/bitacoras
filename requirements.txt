@@ -1,5 +1,11 @@
 Flask
+Flask-SQLAlchemy
+Flask-SocketIO
 SQLAlchemy
+Werkzeug
 weasyprint
-pywin32
-psycopg2-binary
+python-dotenv
+PyMySQL
+cryptography
+MarkupSafe
+# Dependencias de correo y sistema (suelen venir con Python o Flask)
