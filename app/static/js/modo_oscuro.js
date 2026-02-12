@@ -3,8 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const themeButtons = document.querySelectorAll("[data-theme-value]");
     const body = document.body;
     const currentIcon = document.getElementById("current-theme-icon");
-    window.sunIcon  = "/static/icons/brightness-high.svg";
-    window.moonIcon = "/static/icons/moon-fill.svg";
+    window.sunIcon  = `${window.APP_BASE}/static/icons/brightness-high.svg`;
+    window.moonIcon = `${window.APP_BASE}/static/icons/moon-fill.svg`;
 
     function applyTheme(theme) {
         if (theme === "dark") {

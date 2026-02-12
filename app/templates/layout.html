@@ -19,7 +19,7 @@
     <div class="container-fluid">
 
         <!-- Logo -->
-        <a class="navbar-brand d-flex align-items-center" href="#">
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('clientes_bp.inicio') }}">
             <img src="{{ url_for('static', filename='img/logo_ctr.png') }}"
                  alt="Logo"
                  width="60"
@@ -43,7 +43,7 @@
             <!-- IZQUIERDA: menú -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/">Inicio</a>
+                    <a class="nav-link active" href="{{ url_for('clientes_bp.inicio') }}">Inicio</a>
                 </li>
 
                 <!-- Crear Bitácora -->
@@ -128,7 +128,7 @@
 
             <!-- DERECHA: todo alineado en una sola fila -->
             <div class="d-flex align-items-center gap-2">
-
+                
                 <!-- + Nuevo cliente -->
                 <a class="btn btn-sm btn-outline-success"
                    href="{{ url_for('clientes_bp.nuevo_cliente') }}">
@@ -210,5 +210,9 @@
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modo_oscuro.js') }}"></script>
     <!-- Script para alternar modo oscuro -->
+    <script>
+        // script_root puede ser "" o "/bitacoras"
+        window.APP_BASE = ("{{ request.script_root or '' }}").replace(/\/+$/, "");
+    </script>
 </body>
 </html>

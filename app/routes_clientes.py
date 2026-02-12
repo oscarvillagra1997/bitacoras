@@ -101,10 +101,10 @@ def nuevo_destinatario(cliente_id):
         nombre = request.form.get("nombre") or None
         email = (request.form.get("email") or "").strip()
         tipo = (request.form.get("tipo") or "to").lower()
-        lugar_id_raw = request.form.get("lugar_id")
+        lugar_id_raw = (request.form.get("lugar_id") or "").strip()
 
         lugar_id = None
-        if lugar_id_raw not in (None, "", "none"):
+        if lugar_id_raw and lugar_id_raw.lower() not in ("none", "null", "0"):
             try:
                 lugar_id = int(lugar_id_raw)
             except ValueError:
@@ -161,10 +161,10 @@ def editar_destinatario(destinatario_id):
         nombre = request.form.get("nombre") or None
         email = (request.form.get("email") or "").strip()
         tipo = (request.form.get("tipo") or "to").lower()
-        lugar_id_raw = request.form.get("lugar_id")
+        lugar_id_raw = (request.form.get("lugar_id") or "").strip()
 
         lugar_id = None
-        if lugar_id_raw not in (None, "", "none"):
+        if lugar_id_raw and lugar_id_raw.lower() not in ("none", "null", "0"):
             try:
                 lugar_id = int(lugar_id_raw)
             except ValueError:
@@ -268,6 +268,28 @@ def toggle_lugar_activo(lugar_id):
 
     return redirect(url_for("clientes_bp.ver_destinatarios_cliente", cliente_id=cliente_id))
 
+@clientes_bp.route("/lugares/<int:lugar_id>/toggle-individual", methods=["POST"], endpoint="toggle_lugar_individual")
+def toggle_lugar_individual(lugar_id):
+    lugar = db_session.query(Lugar).get(lugar_id)
+    if not lugar:
+        abort(404)
+
+    cliente_id = lugar.cliente_id
+
+    try:
+        lugar.requiere_bitacora_individual = not lugar.requiere_bitacora_individual
+        db_session.commit()
+
+        estado = "activada" if lugar.requiere_bitacora_individual else "desactivada"
+        flash(f"Bitácora individual {estado} para '{lugar.nombre}'.", "success")
+
+    except Exception as e:
+        db_session.rollback()
+        print("Error al cambiar bitácora individual del lugar:", e)
+        flash("No se pudo cambiar la bitácora individual del lugar.", "danger")
+
+    return redirect(url_for("clientes_bp.ver_destinatarios_cliente", cliente_id=cliente_id))
+
 
 @clientes_bp.route("/clientes/nuevo", methods=["GET", "POST"], endpoint="nuevo_cliente")
 def nuevo_cliente():
@@ -323,4 +345,41 @@ def toggle_modo_pruebas():
     # Si hay referrer, vuelve ahí. Si no, al inicio del blueprint.
     return redirect(request.referrer or url_for("clientes_bp.inicio"))
 
+@clientes_bp.route("/clientes/<int:cliente_id>/editar", methods=["GET", "POST"], endpoint="editar_cliente")
+def editar_cliente(cliente_id):
+    cliente = db_session.query(Cliente).get(cliente_id)
+    if not cliente:
+        abort(404)
+
+    if request.method == "POST":
+        nombre = (request.form.get("nombre") or "").strip()
+        modo_envio = request.form.get("modo_envio") or "consolidado"
+        activo = bool(request.form.get("activo"))
+
+        logo_file = request.files.get("logo")
+
+        if not nombre:
+            flash("El nombre del cliente es obligatorio.", "danger")
+            return render_template("form_cliente.html", cliente=cliente, modo="editar")
+
+        try:
+            cliente.nombre = nombre
+            cliente.modo_envio = modo_envio
+            cliente.activo = activo
+
+            # Logo opcional (si suben uno nuevo, reemplaza el campo en BD)
+            logo_rel = guardar_logo(logo_file, cliente.id)
+            if logo_rel:
+                cliente.logo = logo_rel
+
+            db_session.commit()
+            flash("Cliente actualizado correctamente.", "success")
+            return redirect(url_for("clientes_bp.ver_destinatarios_cliente", cliente_id=cliente.id))
+
+        except Exception as e:
+            db_session.rollback()
+            print("Error al editar cliente:", e)
+            flash("No se pudo actualizar el cliente.", "danger")
+
+    return render_template("form_cliente.html", cliente=cliente, modo="editar")
 

@@ -1,6 +1,7 @@
 from weasyprint import HTML
 import os
 import smtplib
+from dotenv import load_dotenv
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -15,6 +16,9 @@ from markupsafe import escape
 # ========================
 #  HELPERS MODO PRUEBAS
 # ========================
+
+# Carga las variables al inicio del archivo
+load_dotenv()
 
 CORREO_PRUEBAS = "oscar.villagra@ctr.cl"
 
@@ -333,7 +337,7 @@ def enviar_correo_bitacora_html(session, nueva_bitacora, lugar_obj, pdf_path):
     """
     try:
         pdf_path = os.path.abspath(pdf_path)
-        logo_path = r'C:\Users\oscar.villagra\Documents\VSCode\SeguridadElectronica\bitacorasAPP\firma_correo.png'
+        logo_path = r'/home/administrador/seguridad_electronica/python_APIs/seguridad_electronica/bitacoras_app/bitacoras/firma_correo.png'
 
         if not os.path.exists(pdf_path):
             raise FileNotFoundError(f"⚠️ ERROR: El archivo PDF no existe en la ruta: {pdf_path}")
@@ -342,10 +346,13 @@ def enviar_correo_bitacora_html(session, nueva_bitacora, lugar_obj, pdf_path):
             raise FileNotFoundError(f"⚠️ ERROR: La firma no existe en la ruta: {logo_path}")
 
         # ================== CONFIG SMTP OUTLOOK ==================
-        SMTP_SERVER = "smtp.office365.com"
-        SMTP_PORT = 587  # TLS
-        SMTP_USER = "bitacoras@ctr.cl"
-        SMTP_PASS = "Carlota123!"
+        SMTP_SERVER = os.getenv("SMTP_SERVER")
+        SMTP_PORT = int(os.getenv("SMTP_PORT", 587)) # Se convierte a entero
+        SMTP_USER = os.getenv("SMTP_USER")
+        SMTP_PASS = os.getenv("SMTP_PASS")
+
+        if not SMTP_USER or not SMTP_PASS:
+            raise ValueError("⚠️ ERROR: OUTLOOK_USER u OUTLOOK_PASS no configurados o vacíos.")
 
         if not SMTP_USER or not SMTP_PASS:
             raise ValueError("⚠️ ERROR: OUTLOOK_USER u OUTLOOK_PASS no configurados o vacíos.")

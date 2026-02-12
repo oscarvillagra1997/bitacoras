@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!clienteId) return;
 
             try {
-                const resp = await fetch(`/api/lugares/${clienteId}`);
+                const resp = await fetch(`${window.APP_BASE}/api/lugares/${clienteId}`);
                 if (!resp.ok) throw new Error("Error al cargar lugares");
 
                 const data = await resp.json();

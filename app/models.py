@@ -3,6 +3,8 @@ from sqlalchemy import (
     Text
 )
 from sqlalchemy.orm import relationship, declarative_base
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
 
@@ -73,14 +75,24 @@ class Destinatario(Base):
 # ===========================================
 # 4. OPERADORES
 # ===========================================
-class Operador(Base):
+class Operador(Base, UserMixin):
     __tablename__ = "operadores"
 
     id = Column(Integer, primary_key=True)
     nombre = Column(String(150), nullable=False)
-    email = Column(String(150))
+    email = Column(String(150), unique=True)  # recomendable unique
     rol = Column(String(50))
     activo = Column(Boolean, nullable=False, default=True)
+
+    password_hash = Column(String(255), nullable=True)  # 👈 NUEVO
+
+    def set_password(self, password: str):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        if not self.password_hash:
+            return False
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f"<Operador {self.id} {self.nombre}>"

@@ -4,19 +4,53 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="fw-bold mb-3">
-        Destinatarios de {{ cliente.nombre }}
-    </h1>
+        <!-- HEADER SUPERIOR -->
+    <div class="d-flex justify-content-between align-items-start mb-3">
 
-    <p class="text-muted">
-        Modo de envío:
-        {% if es_consolidado %}
-            <span class="badge bg-info text-dark">Consolidado (una bitácora por jornada)</span>
-        {% else %}
-            <span class="badge bg-secondary">Por lugar (una bitácora por lugar)</span>
-        {% endif %}
-    </p>
+        <!-- LADO IZQUIERDO -->
+        <div>
+            <h1 class="fw-bold mb-1">
+                Destinatarios de {{ cliente.nombre }}
+            </h1>
 
+            <p class="text-muted mb-0">
+                Modo de envío:
+                {% if es_consolidado %}
+                    <span class="badge bg-info text-dark">
+                        Consolidado (una bitácora por jornada)
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary">
+                        Por lugar (una bitácora por lugar)
+                    </span>
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- LADO DERECHO: BOTONES -->
+        <div class="d-flex gap-2">
+
+            <!-- Editar cliente -->
+            <a class="btn btn-warning btn-sm"
+            href="{{ url_for('clientes_bp.editar_cliente', cliente_id=cliente.id) }}">
+                + Editar cliente
+            </a>
+
+            <!-- Destinatario consolidado (solo si aplica) 
+            {% if es_consolidado %}
+            <a href="{{ url_for('clientes_bp.nuevo_destinatario', cliente_id=cliente.id, consolidado=1) }}"
+            class="btn btn-outline-primary btn-sm">
+                + Destinatario consolidado
+            </a>
+            {% endif %}
+            -->
+            <!-- Destinatario normal -->
+            <a href="{{ url_for('clientes_bp.nuevo_destinatario', cliente_id=cliente.id) }}"
+            class="btn btn-danger btn-sm">
+                + Agregar destinatario
+            </a>
+        </div>
+    </div>
     <!-- ============================
          TARJETA LUGARES DEL CLIENTE
          ============================ -->
@@ -87,10 +121,22 @@
                                               action="{{ url_for('clientes_bp.toggle_lugar_activo', lugar_id=lugar.id) }}"
                                               style="display:inline;">
                                             <button type="submit"
-                                                    class="btn btn-outline-secondary btn-sm">
+                                                    class="btn btn-danger btn-sm">
                                                 {% if lugar.activo %}Desactivar{% else %}Activar{% endif %}
                                             </button>
                                         </form>
+                                        <form method="post"
+                                            action="{{ url_for('clientes_bp.toggle_lugar_individual', lugar_id=lugar.id) }}"
+                                            style="display:inline;">
+                                            <button type="submit"
+                                                    class="btn btn-warning btn-sm">
+                                                {% if lugar.requiere_bitacora_individual %}
+                                                    Quitar individual
+                                                {% else %}
+                                                    Hacer individual
+                                                {% endif %}
+                                            </button>
+                                        </form>   
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -102,22 +148,13 @@
             {% endif %}
         </div>
     </div>
-
     <!-- ============================
          TARJETA DESTINATARIOS
          ============================ -->
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2 class="h5 mb-0">Destinatarios configurados</h2>
-        <a href="{{ url_for('clientes_bp.nuevo_destinatario', cliente_id=cliente.id) }}"
-           class="btn btn-primary btn-sm">
-            + Agregar destinatario
-        </a>
-    </div>
-
     {% if grupos_destinatarios %}
         {% for nombre_lugar, dests in grupos_destinatarios|dictsort %}
             <div class="card mb-3 shadow-sm">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <div class="card-header bg-primary d-flex justify-content-between align-items-center">
                     <span class="fw-semibold">
                         {% if es_consolidado and nombre_lugar == "Consolidado / Sin lugar" %}
                             Consolidado / sin lugar específico

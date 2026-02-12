@@ -13,7 +13,8 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form method="post">
+            <form method="post" 
+                action="{% if destinatario %}{{ url_for('clientes_bp.editar_destinatario', destinatario_id=destinatario.id) }}{% else %}{{ url_for('clientes_bp.nuevo_destinatario', cliente_id=cliente.id) }}{% endif %}">
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre / Cargo</label>
                     <input type="text" class="form-control" id="nombre" name="nombre"

@@ -1,9 +1,14 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Date, Time, Text, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+import os
+from dotenv import load_dotenv
+# Carga las variables de entorno desde el archivo .env
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL") 
 
 # Base de datos y conexión
-DATABASE_URL = "postgresql://bitacoras:Labo0123@168.196.184.202:5432/bitacorasDB"
 engine = create_engine(DATABASE_URL)
 Base = declarative_base()
 
