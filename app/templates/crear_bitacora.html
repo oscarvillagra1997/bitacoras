@@ -13,6 +13,9 @@ Crear Bitácora
             - {{ cliente_actual.nombre }}
         {% endif %}
     </h1>
+    <button type="button" id="btnVaciarBitacora" class="btn btn-outline-danger mb-3">
+        Vaciar eventos
+    </button>
     <form method="post" action="{{ url_for('bitacoras_bp.crear_bitacora') }}">
         <!-- BLOQUE: INFO GENERAL -->
         <div class="card shadow-sm mb-4">

@@ -326,6 +326,7 @@ def obtener_destinatarios_db(session, cliente_id, lugar_id=None):
     return destinatarios
 
 
+
 # ============================================================
 #  ENVÍO DE CORREO (por lugar o consolidado)
 # ============================================================

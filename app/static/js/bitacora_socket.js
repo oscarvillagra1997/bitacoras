@@ -1,26 +1,25 @@
-// bitacora_socket.js
+// static/js/bitacora_socket.js
 
 function inicializarSocket() {
   try {
-    const base = (window.APP_BASE || "").replace(/\/+$/, ""); // sin slash final
+    // ✅ Evita doble conexión
+    if (window.socket && window.socket.connected) return;
+
+    const base = (window.APP_BASE || "").replace(/\/+$/, "");
     const socketPath = base ? `${base}/socket.io` : "/socket.io";
 
     window.socket = io({
       path: socketPath,
-      query: {
-        cliente_id: currentClienteId || ""
-      }
+      query: { cliente_id: currentClienteId || "" }
     });
 
+    const estado = document.getElementById("estado-socket");
+
     window.socket.on("connect", () => {
-      console.log("✅ Conectado a Socket.IO");
-      const estado = document.getElementById("estado-socket");
       if (estado) estado.textContent = "Conectado";
     });
 
     window.socket.on("disconnect", () => {
-      console.log("⚠️ Desconectado de Socket.IO");
-      const estado = document.getElementById("estado-socket");
       if (estado) estado.textContent = "Desconectado";
     });
 
@@ -32,13 +31,12 @@ function inicializarSocket() {
     });
 
     window.socket.on("snapshot_inicial", (data) => {
-      console.log("📦 Snapshot recibido:", data);
       aplicarSnapshotInicial(data);
     });
 
     window.socket.on("evento_nuevo", (data) => {
-      console.log("📢 evento_nuevo desde otro cliente:", data);
-      agregarFilaEvento(false, data.row || { id: data.id });
+      // El servidor en tu sockets.py emite row_data, no {row:...}
+      agregarFilaEvento(false, data);
     });
 
     window.socket.on("evento_update", (data) => {
@@ -50,12 +48,20 @@ function inicializarSocket() {
     });
 
     window.socket.on("form_update", (data) => {
+      SUPRIMIR_EMIT_FORM = true;
       aplicarFormUpdateRemoto(data);
+      SUPRIMIR_EMIT_FORM = false;
     });
 
-    window.socket.emit("bitacora_ping", {
-      mensaje: "Hola, acabo de abrir la pantalla de bitácora",
-      timestamp: new Date().toISOString(),
+    window.socket.on("bitacora_vaciada", (data) => {
+      vaciarBitacoraUI({ mantenerCliente: true });
+
+      Swal.fire({
+        icon: "success",
+        title: "Bitácora vaciada",
+        timer: 1200,
+        showConfirmButton: false
+      });
     });
 
   } catch (err) {
@@ -64,6 +70,19 @@ function inicializarSocket() {
     if (estado) estado.textContent = "Error al conectar";
   }
 }
+
+// Para que el core pueda reconectar al cambiar cliente
+window.inicializarSocket = inicializarSocket;
+
+window.reconectarSocketCliente = function(clienteId) {
+  currentClienteId = clienteId || null;
+
+  if (window.socket) {
+    try { window.socket.disconnect(); } catch (_) {}
+    window.socket = null;
+  }
+  inicializarSocket();
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   inicializarSocket();
