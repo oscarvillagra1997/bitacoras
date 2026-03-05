@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Inicio - Gestión de Bitácoras
+{% endblock %}
+
+{% block content %}
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+        Clientes habilitados para envío de bitácoras
+    </div>
+    <div class="card-body">
+        {% if clientes_habilitados %}
+            <ul class="list-group">
+                {% for cliente in clientes_habilitados %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <strong>{{ cliente.nombre }}</strong>
+                        <span class="badge bg-success">Activo</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">No hay clientes habilitados actualmente.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

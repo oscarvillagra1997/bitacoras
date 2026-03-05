@@ -1,0 +1,17 @@
+# venv
+bitacoras-env/
+venv/
+
+# outputs
+bitacoras/
+*.pdf
+
+# python cache
+__pycache__/
+*.pyc
+
+# env
+.env
+
+# logs
+*.log

@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Lista de Bitácoras</h1>
+
+<!-- Formulario de Filtros -->
+<form method="GET" action="{{ url_for('bitacoras_bp.listar_bitacoras') }}" class="mb-4">
+    <div class="row">
+        <!-- Selector de Lugar -->
+        <div class="col-md-4">
+            <label for="lugar">Filtrar por Lugar:</label>
+            <select id="lugar" name="lugar" class="form-control">
+                <option value="" selected>Todos los Lugares</option>
+                {% for lugar in lugares %}
+                    <option value="{{ lugar.id }}" {% if lugar.id|string == request.args.get('lugar', '') %}selected{% endif %}>{{ lugar.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Rango de Fechas -->
+        <div class="col-md-3">
+            <label for="fecha_inicio">Fecha Inicio:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ request.args.get('fecha_inicio', '') }}">
+        </div>
+        <div class="col-md-3">
+            <label for="fecha_fin">Fecha Fin:</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ request.args.get('fecha_fin', '') }}">
+        </div>
+
+        <!-- Botón de Filtrar -->
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+    </div>
+</form>
+
+<!-- Tabla de Bitácoras -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Lugar</th>
+            <th>Fecha de Inicio</th>
+            <th>Fecha de Fin</th>
+            <th>Horario</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for bitacora in bitacoras %}
+            <tr>
+                <td>{{ bitacora.eventos[0].lugar.nombre }}</td>  <!-- Se asume que cada bitácora tiene eventos -->
+                <td>{{ bitacora.fecha_inicio }}</td>
+                <td>{{ bitacora.fecha_fin }}</td>
+                <td>{{ bitacora.horario }}</td>
+                <td>
+                    <a href="{{ url_for('bitacoras_bp.detalles_bitacora', bitacora_id=bitacora.id) }}" class="btn btn-info btn-sm">Detalles</a>
+                    <a href="{{ url_for('bitacoras_bp.descargar_bitacora', bitacora_id=bitacora.id, lugar_nombre=bitacora.eventos[0].lugar.nombre.replace(' ', '_')) }}" class="btn btn-primary btn-sm">Descargar PDF</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,11 @@
+Flask
+Flask-SQLAlchemy
+Flask-SocketIO
+SQLAlchemy
+Werkzeug
+weasyprint
+python-dotenv
+PyMySQL
+cryptography
+MarkupSafe
+# Dependencias de correo y sistema (suelen venir con Python o Flask)
